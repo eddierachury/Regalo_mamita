@@ -1,0 +1,1 @@
+import ConfettiButton from './ConfettiButton';export default function FinalMessage({settings}){return <div className='card p-6 text-center'><h3>{settings.finalTitle}</h3><p>{settings.finalMessage}</p><div className='mt-4'><ConfettiButton text={settings.confettiButtonText} enabled={settings.confettiEnabled}/></div></div>}
