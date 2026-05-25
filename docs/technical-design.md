@@ -1,0 +1,14 @@
+# Technical Design
+- Full-stack: FastAPI + React/Vite/Tailwind/Framer Motion.
+- Frontend: SPA con componentes por sección y cliente API único.
+- Backend: servicio JSON y routers modulares.
+- API: endpoints de contenido y bundle /api/museum.
+- JSON data: archivos independientes fáciles de editar.
+- Static media: /static/images, /static/music, /static/videos.
+- Manim architecture: pipeline futuro en backend/manim/ y export MP4.
+- Integration flow: frontend solicita /api/museum y renderiza por secciones.
+- Local ports: 8000 backend, 5173 frontend.
+- Env vars: VITE_API_BASE_URL.
+- Error handling: HTTP 404/500 por archivo; frontend fallback amigable.
+- Deployment: split FE/BE o VPS único.
+- Phases: estructura base, contenido, UI, integración, despliegue.

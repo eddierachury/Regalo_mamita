@@ -1,0 +1,1 @@
+import confetti from 'canvas-confetti';export default function ConfettiButton({text='Celebrar tu vida',enabled=true}){if(!enabled) return null;return <button onClick={()=>confetti({particleCount:120,spread:80,origin:{y:0.7}})} className='px-4 py-2 bg-rose-600 text-white rounded'>{text}</button>}

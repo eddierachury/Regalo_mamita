@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.venv/
+__pycache__/
+.pytest_cache/
+.env
+.DS_Store
+frontend/.env
+backend/.env
+backend/app/static/images/*
+!backend/app/static/images/.gitkeep
