@@ -89,7 +89,7 @@ export default function Hero({ profile }) {
               fontWeight: 700,
             }}
           >
-            <span>🌸</span> Para mamita
+            <span>🌸</span> {profile.subtitle || 'Para mamita'}
           </motion.div>
 
           <motion.h1

@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { resolveMediaUrl } from '../api/museumApi';
 
-const EQUATION_TERMS = [
+const DEFAULT_ICONS = { 'Amor': '❤️', 'Paciencia': '🕊️', 'Fortaleza': '💪', 'Ternura': '🌸', 'Sacrificio': '✨' };
+
+const DEFAULT_TERMS = [
   { label: 'Amor',      icon: '❤️' },
   { label: 'Paciencia', icon: '🕊️' },
   { label: 'Fortaleza', icon: '💪' },
@@ -10,8 +12,19 @@ const EQUATION_TERMS = [
   { label: 'Sacrificio', icon: '✨' },
 ];
 
+function parseEquation(eq) {
+  if (!eq) return { terms: DEFAULT_TERMS, result: 'Mamá' };
+  const [leftSide, result] = eq.split('=').map(s => s.trim());
+  const terms = leftSide.split('+').map(s => {
+    const label = s.trim();
+    return { label, icon: DEFAULT_ICONS[label] || '✦' };
+  });
+  return { terms, result: result || 'Mamá' };
+}
+
 export default function ManimVideo({ settings }) {
   const [videoOk, setVideoOk] = useState(true);
+  const { terms: equationTerms, result: equationResult } = parseEquation(settings.videoEquation);
 
   return (
     <div style={{
@@ -129,7 +142,7 @@ export default function ManimVideo({ settings }) {
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-          {EQUATION_TERMS.map((term, i) => (
+          {equationTerms.map((term, i) => (
             <motion.div
               key={term.label}
               initial={{ opacity: 0, x: 20 }}
@@ -171,9 +184,21 @@ export default function ManimVideo({ settings }) {
               color: 'var(--burgundy)',
               fontStyle: 'italic',
             }}>
-              Mamá 💕
+              {equationResult || settings.videoName || 'Mamá'} 💕
             </span>
           </div>
+
+          {settings.videoFinalPhrase && (
+            <p style={{
+              marginTop: '0.75rem',
+              fontSize: '0.85rem',
+              fontStyle: 'italic',
+              color: 'var(--text-mid)',
+              lineHeight: 1.65,
+            }}>
+              {settings.videoFinalPhrase}
+            </p>
+          )}
         </div>
       </motion.div>
 

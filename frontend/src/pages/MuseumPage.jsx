@@ -56,8 +56,20 @@ export default function MuseumPage() {
 
   useEffect(() => {
     fetchMuseum()
-      .then(res => setData({ ...FALLBACK, ...res }))
-      .catch(() => setUsingFallback(true))
+      .then(res => {
+        // Deep merge: use API values, fall back to FALLBACK for missing fields
+        setData({
+          profile:  { ...FALLBACK.profile,  ...res.profile },
+          timeline: Array.isArray(res.timeline) && res.timeline.length > 0 ? res.timeline : FALLBACK.timeline,
+          gallery:  Array.isArray(res.gallery)  && res.gallery.length > 0  ? res.gallery  : FALLBACK.gallery,
+          letter:   { ...FALLBACK.letter,   ...res.letter },
+          settings: { ...FALLBACK.settings, ...res.settings },
+        });
+      })
+      .catch((err) => {
+        console.warn('Museo API no disponible, usando datos de respaldo:', err.message);
+        setUsingFallback(true);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -157,7 +169,7 @@ export default function MuseumPage() {
       <SectionWrapper
         id="video"
         title={data.settings.videoTitle || 'La ecuación de mamá'}
-        subtitle="Hay cosas que no se pueden explicar solo con palabras…"
+        subtitle={data.settings.videoDescription || 'Hay cosas que no se pueden explicar solo con palabras…'}
         accent="✨"
       >
         <ManimVideo settings={data.settings} />
@@ -166,8 +178,8 @@ export default function MuseumPage() {
       {/* ── Letter ── */}
       <SectionWrapper
         id="letter"
-        title="Carta"
-        subtitle="Para la mujer que pintó mi mundo de colores"
+        title={data.letter.title || 'Carta'}
+        subtitle={data.letter.intro || 'Para la mujer que pintó mi mundo de colores'}
         accent="💌"
       >
         <InteractiveLetter letter={data.letter} />
@@ -176,8 +188,7 @@ export default function MuseumPage() {
       {/* ── Final celebration ── */}
       <SectionWrapper
         id="final"
-        title="Gracias por ser mi mamá"
-        subtitle="Feliz es el mejor final mensaje mi mamá"
+        title={data.settings.finalTitle || 'Gracias por ser mi mamá'}
         accent="🎉"
       >
         <FinalMessage settings={data.settings} />
