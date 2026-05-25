@@ -1,3 +1,207 @@
-import {useEffect,useState} from 'react';import {fetchMuseum} from '../api/museumApi';import Navbar from '../components/Layout/Navbar';import SectionWrapper from '../components/Layout/SectionWrapper';import Hero from '../components/Hero';import Timeline from '../components/Timeline';import Gallery from '../components/Gallery';import ManimVideo from '../components/ManimVideo';import InteractiveLetter from '../components/InteractiveLetter';import FinalMessage from '../components/FinalMessage';import MusicToggle from '../components/MusicToggle';
-const fallback={profile:{pageTitle:'Museo de Mamá',birthdayMessage:'Cargando recuerdos...',startButtonText:'Ver recuerdos',heroImage:'/static/images/Imagen1.png',heroImageAlt:'Mamá'},timeline:[],gallery:[],letter:{title:'Carta',intro:'',buttonText:'Abrir',paragraphs:[],signature:''},settings:{musicEnabled:true,musicUrl:'/static/music/madrecita-querida.mp3',musicVolume:0.3,videoTitle:'La ecuación de mamá',videoDescription:'',videoUrl:'/static/videos/ecuacion_mama.mp4',videoPlaceholderMessage:'Muy pronto aquí estará una animación especial creada con amor para ti.',finalTitle:'Gracias por ser mi mamá',finalMessage:'',confettiEnabled:true,confettiButtonText:'Celebrar tu vida'}};
-export default function MuseumPage(){const[d,setD]=useState(fallback);const[l,setL]=useState(true);const[e,setE]=useState('');useEffect(()=>{fetchMuseum().then(r=>setD({...fallback,...r})).catch(()=>setE('Usando contenido local de respaldo.')).finally(()=>setL(false));},[]);if(l)return <main className='p-8'>Cargando museo...</main>;return <main><Navbar/>{e&&<p className='text-center p-2'>{e}</p>}<SectionWrapper id='hero'><Hero profile={d.profile}/></SectionWrapper><SectionWrapper id='timeline' title='Línea del tiempo'><Timeline items={d.timeline}/></SectionWrapper><SectionWrapper id='gallery' title='Galería'><Gallery items={d.gallery}/></SectionWrapper><SectionWrapper id='video' title='La ecuación de mamá'><ManimVideo settings={d.settings}/></SectionWrapper><SectionWrapper id='letter' title='Carta'><InteractiveLetter letter={d.letter}/></SectionWrapper><SectionWrapper id='final'><FinalMessage settings={d.settings}/></SectionWrapper>{d.settings.musicEnabled&&<MusicToggle settings={d.settings}/>}</main>}
+import { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
+import { fetchMuseum } from '../api/museumApi';
+import Navbar from '../components/Layout/Navbar';
+import SectionWrapper from '../components/Layout/SectionWrapper';
+import Hero from '../components/Hero';
+import Timeline from '../components/Timeline';
+import Gallery from '../components/Gallery';
+import ManimVideo from '../components/ManimVideo';
+import InteractiveLetter from '../components/InteractiveLetter';
+import FinalMessage from '../components/FinalMessage';
+import MusicToggle from '../components/MusicToggle';
+
+/* ─── Fallback data (matches API field names exactly) ─── */
+const FALLBACK = {
+  profile: {
+    pageTitle: 'Museo de Mamá',
+    birthdayMessage: '¡Feliz cumpleaños, Mamá! Gracias por ser la luz y la inspiración de mi vida. Que este nuevo año te traiga tanta felicidad como la que tú me das todos los días.',
+    startButtonText: 'Ver recuerdos',
+    heroImage: '/static/images/Imagen1.png',
+    heroImageAlt: 'Mamá',
+  },
+  timeline: [],
+  gallery: [],
+  letter: {
+    title: 'Carta',
+    intro: 'Para la mujer que pintó mi mundo de colores',
+    buttonText: 'Te amo, mamí ❤',
+    paragraphs: [],
+    signature: '',
+  },
+  settings: {
+    musicEnabled: true,
+    musicUrl: '/static/music/madrecita-querida.mp3',
+    musicVolume: 0.3,
+    videoTitle: 'La ecuación de mamá',
+    videoDescription: '',
+    videoUrl: '/static/videos/ecuacion_mama.mp4',
+    videoPlaceholderMessage: 'Muy pronto aquí estará una animación especial creada con amor para ti.',
+    finalTitle: 'Gracias por ser mi mamá',
+    finalMessage: 'Feliz es el mejor final mensaje mi mamá.',
+    confettiEnabled: true,
+    confettiButtonText: 'Celebrar tu vida',
+  },
+};
+
+export default function MuseumPage() {
+  const [data, setData] = useState(FALLBACK);
+  const [loading, setLoading] = useState(true);
+  const [usingFallback, setUsingFallback] = useState(false);
+
+  // Music toggle ref for navbar integration
+  const musicRef = useRef(null);
+  const [musicPlaying, setMusicPlaying] = useState(false);
+  const [musicError, setMusicError] = useState(false);
+
+  useEffect(() => {
+    fetchMuseum()
+      .then(res => setData({ ...FALLBACK, ...res }))
+      .catch(() => setUsingFallback(true))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleMusicToggle = () => {
+    if (musicRef.current) {
+      musicRef.current.toggle();
+      setMusicPlaying(p => !p);
+    }
+  };
+
+  /* ─── Loading ─── */
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        gap: '1.5rem',
+      }}>
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1.4, ease: 'linear' }}
+          style={{
+            width: 52, height: 52,
+            border: '4px solid var(--rose-blush)',
+            borderTop: '4px solid var(--rose-deep)',
+            borderRadius: '50%',
+          }}
+        />
+        <p style={{
+          fontFamily: 'var(--font-serif)',
+          fontStyle: 'italic',
+          color: 'var(--text-mid)',
+          fontSize: '1.05rem',
+        }}>
+          Cargando recuerdos con amor… 🌸
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ position: 'relative', minHeight: '100vh' }}>
+      {/* ── Navbar ── */}
+      <Navbar
+        onMusicToggle={data.settings.musicEnabled ? handleMusicToggle : null}
+        musicPlaying={musicPlaying}
+        musicError={musicError}
+      />
+
+      {/* ── Fallback notice ── */}
+      {usingFallback && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            background: 'rgba(245,223,165,0.25)',
+            border: '1px solid rgba(201,168,76,0.3)',
+            borderRadius: '0.5rem',
+            padding: '0.5rem 1rem',
+            textAlign: 'center',
+            fontSize: '0.82rem',
+            color: 'var(--text-mid)',
+            maxWidth: 600,
+            margin: '0.75rem auto',
+            fontStyle: 'italic',
+          }}
+        >
+          🌸 Mostrando contenido de respaldo — el servidor no está disponible.
+        </motion.div>
+      )}
+
+      {/* ── Hero (full-width, no SectionWrapper) ── */}
+      <Hero profile={data.profile} />
+
+      {/* ── Timeline ── */}
+      <SectionWrapper
+        id="timeline"
+        title="Una historia llena de amor"
+        subtitle="Cada momento contigo es un tesoro"
+        accent="💕"
+      >
+        <Timeline items={data.timeline} />
+      </SectionWrapper>
+
+      {/* ── Gallery ── */}
+      <SectionWrapper
+        id="gallery"
+        title="Galería de momentos"
+        subtitle="Fotografías que guardan toda la ternura del mundo"
+        accent="🌸"
+      >
+        <Gallery items={data.gallery} />
+      </SectionWrapper>
+
+      {/* ── Video ── */}
+      <SectionWrapper
+        id="video"
+        title={data.settings.videoTitle || 'La ecuación de mamá'}
+        subtitle="Hay cosas que no se pueden explicar solo con palabras…"
+        accent="✨"
+      >
+        <ManimVideo settings={data.settings} />
+      </SectionWrapper>
+
+      {/* ── Letter ── */}
+      <SectionWrapper
+        id="letter"
+        title="Carta"
+        subtitle="Para la mujer que pintó mi mundo de colores"
+        accent="💌"
+      >
+        <InteractiveLetter letter={data.letter} />
+      </SectionWrapper>
+
+      {/* ── Final celebration ── */}
+      <SectionWrapper
+        id="final"
+        title="Gracias por ser mi mamá"
+        subtitle="Feliz es el mejor final mensaje mi mamá"
+        accent="🎉"
+      >
+        <FinalMessage settings={data.settings} />
+      </SectionWrapper>
+
+      {/* ── Footer ── */}
+      <footer style={{
+        textAlign: 'center',
+        padding: '2rem 1rem',
+        fontFamily: 'var(--font-serif)',
+        fontStyle: 'italic',
+        color: 'var(--text-light)',
+        fontSize: '0.85rem',
+      }}>
+        Hecho con todo el amor del mundo para mamá 💕
+      </footer>
+
+      {/* ── Music Toggle (fixed overlay) ── */}
+      {data.settings.musicEnabled && (
+        <MusicToggle
+          ref={musicRef}
+          settings={data.settings}
+        />
+      )}
+    </div>
+  );
+}
