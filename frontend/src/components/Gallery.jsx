@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { resolveMediaUrl } from '../api/museumApi';
 
@@ -10,6 +11,7 @@ export default function Gallery({ items = [] }) {
     if (e.key === 'Escape') setSelected(null);
   }, []);
 
+  // Body scroll lock + keyboard listener
   useEffect(() => {
     if (selected) {
       document.addEventListener('keydown', handleKeyDown);
@@ -36,12 +38,7 @@ export default function Gallery({ items = [] }) {
 
   return (
     <>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-        gap: '1.5rem',
-        padding: '0.5rem',
-      }}>
+      <div className="gallery-grid">
         {items.map((item, i) => (
           <motion.button
             key={item.id || i}
@@ -49,27 +46,36 @@ export default function Gallery({ items = [] }) {
             initial={{ opacity: 0, scale: 0.88, rotate: tilts[i % tilts.length] * 0.5 }}
             whileInView={{ opacity: 1, scale: 1, rotate: tilts[i % tilts.length] }}
             viewport={{ once: true, margin: '-40px' }}
-            transition={{ delay: i * 0.07, duration: 0.5, ease: 'easeOut' }}
+            transition={{ delay: i * 0.05, duration: 0.5, ease: 'easeOut' }}
             whileHover={{
-              scale: 1.05,
+              scale: 1.04,
               rotate: 0,
               zIndex: 10,
               transition: { duration: 0.25 },
             }}
             onClick={() => setSelected(item)}
-            style={{
-              all: 'unset',
-              cursor: 'pointer',
-              display: 'block',
-              position: 'relative',
-            }}
+            className="gallery-card-btn"
           >
-            <div className="polaroid" style={{ transformOrigin: 'center center' }}>
-              <img
-                src={resolveMediaUrl(item.image)}
-                alt={item.imageAlt || item.title}
-                style={{ width: '100%', height: '150px', objectFit: 'cover' }}
-              />
+            <div className="polaroid" style={{ transformOrigin: 'center center', height: '100%' }}>
+              <div style={{
+                width: '100%',
+                aspectRatio: '4 / 3',
+                overflow: 'hidden',
+                borderRadius: '2px',
+                background: '#fff8ef',
+              }}>
+                <img
+                  src={resolveMediaUrl(item.image)}
+                  alt={item.imageAlt || item.title}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    objectPosition: 'center top',
+                    display: 'block',
+                  }}
+                />
+              </div>
               <div style={{
                 paddingTop: '0.5rem',
                 paddingBottom: '0.1rem',
@@ -82,7 +88,6 @@ export default function Gallery({ items = [] }) {
               }}>
                 {item.title}
               </div>
-              {/* Heart accent */}
               <div style={{
                 position: 'absolute', top: '6px', right: '6px',
                 fontSize: '0.7rem', opacity: 0.5,
@@ -92,94 +97,186 @@ export default function Gallery({ items = [] }) {
         ))}
       </div>
 
-      {/* Lightbox */}
-      <AnimatePresence>
-        {selected && (
-          <motion.div
-            className="lightbox-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            onClick={() => setSelected(null)}
-          >
+      {/* Lightbox — Portal renders directly into document.body, escaping SectionWrapper stacking context */}
+      {createPortal(
+        <AnimatePresence>
+          {selected && (
             <motion.div
-              initial={{ scale: 0.82, opacity: 0, y: 30 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.88, opacity: 0, y: 20 }}
-              transition={{ duration: 0.35, ease: 'easeOut' }}
-              onClick={e => e.stopPropagation()}
+              key="lightbox-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              onClick={() => setSelected(null)}
               style={{
-                background: '#fff',
-                borderRadius: '1.25rem',
-                padding: '1.25rem',
-                maxWidth: '520px',
-                width: '100%',
-                boxShadow: '0 32px 80px rgba(0,0,0,0.45)',
-                position: 'relative',
-                maxHeight: '90vh',
-                overflow: 'auto',
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 9999,
+                background: 'rgba(30, 8, 15, 0.85)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '1rem',
               }}
             >
-              {/* Close */}
-              <button
-                id="lightbox-close-btn"
-                onClick={() => setSelected(null)}
-                aria-label="Cerrar"
-                style={{
-                  position: 'absolute', top: '1rem', right: '1rem',
-                  background: 'var(--rose-blush)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: 36, height: 36,
-                  fontSize: '1rem',
-                  cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: 'var(--burgundy)',
-                  fontWeight: 700,
-                  zIndex: 10,
-                  transition: 'background 0.2s',
-                }}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--rose-soft)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'var(--rose-blush)'}
+              <motion.div
+                initial={{ scale: 0.85, opacity: 0, y: 24 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 16 }}
+                transition={{ duration: 0.32, ease: 'easeOut' }}
+                onClick={e => e.stopPropagation()}
+                className="lightbox-modal"
               >
-                ✕
-              </button>
+                {/* Close button — always visible top-right */}
+                <button
+                  id="lightbox-close-btn"
+                  onClick={() => setSelected(null)}
+                  aria-label="Cerrar"
+                  style={{
+                    position: 'absolute',
+                    top: '0.75rem',
+                    right: '0.75rem',
+                    background: 'var(--rose-blush, #f9e8e8)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: 40,
+                    height: 40,
+                    fontSize: '1.1rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'var(--burgundy, #7d2235)',
+                    fontWeight: 700,
+                    zIndex: 10,
+                    transition: 'background 0.2s, transform 0.15s',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = 'var(--rose-soft, #f2c4c4)';
+                    e.currentTarget.style.transform = 'scale(1.1)';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = 'var(--rose-blush, #f9e8e8)';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                >
+                  ✕
+                </button>
 
-              {/* Polaroid frame */}
-              <div className="polaroid" style={{ transform: 'none', marginBottom: '1rem' }}>
-                <img
-                  src={resolveMediaUrl(selected.image)}
-                  alt={selected.imageAlt || selected.title}
-                  style={{ width: '100%', maxHeight: '360px', objectFit: 'cover' }}
-                />
-              </div>
-
-              <div style={{ padding: '0 0.5rem 0.5rem' }}>
-                <h3 style={{
-                  fontFamily: 'var(--font-serif)',
-                  fontSize: '1.3rem',
-                  color: 'var(--text-dark)',
-                  marginBottom: '0.5rem',
-                }}>
-                  {selected.title}
-                </h3>
-                <p style={{ fontSize: '0.95rem', color: 'var(--text-mid)', lineHeight: 1.7 }}>
-                  {selected.description}
-                </p>
+                {/* Image frame — contain to show full photo uncropped */}
                 <div style={{
-                  marginTop: '1rem',
-                  fontSize: '1.2rem',
-                  textAlign: 'center',
-                  color: 'var(--rose-mid)',
+                  background: '#fff8ef',
+                  borderRadius: '0.5rem',
+                  border: '1px solid rgba(201,168,76,0.18)',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '1rem',
                 }}>
-                  ❤ ❤ ❤
+                  <img
+                    src={resolveMediaUrl(selected.image)}
+                    alt={selected.imageAlt || selected.title}
+                    className="lightbox-image"
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      objectFit: 'contain',
+                      display: 'block',
+                    }}
+                  />
                 </div>
-              </div>
+
+                {/* Title and description */}
+                <div style={{ padding: '0 0.5rem 0.5rem' }}>
+                  <h3 style={{
+                    fontFamily: "var(--font-serif, 'Playfair Display', serif)",
+                    fontSize: '1.3rem',
+                    color: 'var(--text-dark, #3d1a24)',
+                    marginBottom: '0.5rem',
+                  }}>
+                    {selected.title}
+                  </h3>
+                  <p style={{
+                    fontSize: '0.95rem',
+                    color: 'var(--text-mid, #6b3040)',
+                    lineHeight: 1.7,
+                    fontFamily: "var(--font-sans, 'Lato', sans-serif)",
+                  }}>
+                    {selected.description}
+                  </p>
+                  <div style={{
+                    marginTop: '0.75rem',
+                    fontSize: '1.1rem',
+                    textAlign: 'center',
+                    color: 'var(--rose-mid, #d4747a)',
+                  }}>
+                    ❤ ❤ ❤
+                  </div>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+
+      <style>{`
+        .gallery-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 1.5rem;
+          padding: 0.5rem;
+        }
+        .gallery-card-btn {
+          all: unset;
+          cursor: pointer;
+          display: block;
+          position: relative;
+        }
+
+        /* ── Lightbox modal card ── */
+        .lightbox-modal {
+          background: #fff;
+          border-radius: 1.25rem;
+          padding: 1.25rem;
+          max-width: 600px;
+          width: 90vw;
+          max-height: 88vh;
+          overflow-y: auto;
+          box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+          position: relative;
+        }
+        .lightbox-image {
+          max-height: 60vh;
+        }
+
+        /* ── Responsive breakpoints ── */
+        @media (max-width: 1100px) {
+          .gallery-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 800px) {
+          .gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; }
+          .lightbox-modal {
+            width: 96vw;
+            max-height: 92vh;
+            padding: 1rem;
+            border-radius: 1rem;
+          }
+          .lightbox-image {
+            max-height: 50vh;
+          }
+        }
+        @media (max-width: 500px) {
+          .gallery-grid { grid-template-columns: 1fr; gap: 1.25rem; max-width: 360px; margin: 0 auto; }
+        }
+      `}</style>
     </>
   );
 }

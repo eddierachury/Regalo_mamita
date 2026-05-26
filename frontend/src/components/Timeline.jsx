@@ -119,12 +119,32 @@ function TimelineCard({ item, align }) {
           📅 {item.date}
         </div>
 
+        {/* Image frame — show full photo with warm cream background */}
         {item.image && (
-          <img
-            src={resolveMediaUrl(item.image)}
-            alt={item.imageAlt || item.title}
-            style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '2px' }}
-          />
+          <div style={{
+            width: '100%',
+            maxHeight: '300px',
+            minHeight: '160px',
+            background: '#fff8ef',
+            borderRadius: '6px',
+            border: '1px solid rgba(201,168,76,0.18)',
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <img
+              src={resolveMediaUrl(item.image)}
+              alt={item.imageAlt || item.title}
+              style={{
+                width: '100%',
+                height: '100%',
+                maxHeight: '300px',
+                objectFit: 'contain',
+                display: 'block',
+              }}
+            />
+          </div>
         )}
 
         <div style={{ padding: '0.6rem 0.2rem 0' }}>
