@@ -51,8 +51,13 @@ export default function MuseumPage() {
 
   // Music toggle ref for navbar integration
   const musicRef = useRef(null);
-  const [musicPlaying, setMusicPlaying] = useState(false);
-  const [musicError, setMusicError] = useState(false);
+  const [musicState, setMusicState] = useState({
+    isPlaying: false,
+    playbackError: false,
+    isPlayerVisible: true,
+    currentSongIndex: 0,
+    currentSong: null,
+  });
 
   useEffect(() => {
     fetchMuseum()
@@ -75,15 +80,7 @@ export default function MuseumPage() {
 
   const handleMusicToggle = () => {
     if (musicRef.current) {
-      musicRef.current.toggle();
-      // Read back the actual state after toggle
-      // Use a microtask so the ref state has updated
-      setTimeout(() => {
-        if (musicRef.current) {
-          setMusicPlaying(musicRef.current.playing);
-          setMusicError(musicRef.current.error);
-        }
-      }, 100);
+      musicRef.current.toggleFromNavbar();
     }
   };
 
@@ -123,8 +120,8 @@ export default function MuseumPage() {
       {/* ── Navbar ── */}
       <Navbar
         onMusicToggle={data.settings.musicEnabled ? handleMusicToggle : null}
-        musicPlaying={musicPlaying}
-        musicError={musicError}
+        musicPlaying={musicState.isPlaying}
+        musicError={musicState.playbackError}
       />
 
       {/* ── Fallback notice ── */}
@@ -218,6 +215,7 @@ export default function MuseumPage() {
         <MusicToggle
           ref={musicRef}
           settings={data.settings}
+          onStateChange={setMusicState}
         />
       )}
     </div>

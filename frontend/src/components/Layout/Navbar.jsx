@@ -111,7 +111,6 @@ export default function Navbar({ onMusicToggle, musicPlaying, musicError }) {
             <button
               id="nav-music-toggle"
               onClick={onMusicToggle}
-              disabled={musicError}
               style={{
                 marginLeft: '0.5rem',
                 display: 'flex',
@@ -123,16 +122,14 @@ export default function Navbar({ onMusicToggle, musicPlaying, musicError }) {
                 padding: '0.45rem 0.9rem',
                 borderRadius: '50rem',
                 border: '1px solid rgba(201,168,76,0.4)',
-                background: musicError
-                  ? 'rgba(200,200,200,0.2)'
-                  : 'rgba(201,168,76,0.12)',
-                color: musicError ? 'var(--text-light)' : 'var(--gold-dark)',
-                cursor: musicError ? 'not-allowed' : 'pointer',
+                background: 'rgba(201,168,76,0.12)',
+                color: 'var(--gold-dark)',
+                cursor: 'pointer',
                 transition: 'all 0.2s',
               }}
             >
               <span style={{ fontSize: '1rem' }}>{musicError ? '🚫' : (musicPlaying ? '⏸' : '♪')}</span>
-              <span>{musicError ? 'Sin música' : 'Activar música'}</span>
+              <span>{musicPlaying ? 'Pausar música' : 'Activar música'}</span>
             </button>
           )}
         </div>
