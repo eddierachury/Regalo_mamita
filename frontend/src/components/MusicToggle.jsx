@@ -33,7 +33,7 @@ function safeMediaUrl(rawUrl) {
  * Fails gracefully: if an MP3 is missing/errors, shows "Música no disponible"
  * and allows skipping to the next track.
  */
-const MusicToggle = forwardRef(function MusicToggle({ settings }, ref) {
+const MusicToggle = forwardRef(function MusicToggle({ settings, onStateChange }, ref) {
   // Build playlist from settings
   const playlist = (settings.musicPlaylist && settings.musicPlaylist.length > 0)
     ? settings.musicPlaylist
@@ -48,6 +48,16 @@ const MusicToggle = forwardRef(function MusicToggle({ settings }, ref) {
   const [visible, setVisible] = useState(true);
 
   const currentSong = playlist[currentIndex] || null;
+
+  useEffect(() => {
+    onStateChange?.({
+      isPlaying: playing,
+      playbackError: error,
+      isPlayerVisible: visible,
+      currentSongIndex: currentIndex,
+      currentSong,
+    });
+  }, [playing, error, visible, currentIndex, currentSong, onStateChange]);
 
   // When currentIndex changes, update the audio source
   useEffect(() => {
@@ -67,28 +77,36 @@ const MusicToggle = forwardRef(function MusicToggle({ settings }, ref) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentIndex]);
 
-  const toggle = useCallback(async () => {
+  const playCurrentSong = useCallback(async () => {
     if (!audioRef.current || playlist.length === 0) return;
     try {
-      if (playing) {
-        audioRef.current.pause();
-        setPlaying(false);
-      } else {
-        if (error) {
-          // Try reloading current track
-          audioRef.current.src = safeMediaUrl(currentSong?.url);
-          audioRef.current.load();
-          setError(false);
-        }
-        audioRef.current.volume = settings.musicVolume ?? 0.3;
-        await audioRef.current.play();
-        setPlaying(true);
+      if (error) {
+        audioRef.current.src = safeMediaUrl(currentSong?.url);
+        audioRef.current.load();
+        setError(false);
       }
+      audioRef.current.volume = settings.musicVolume ?? 0.3;
+      await audioRef.current.play();
+      setPlaying(true);
     } catch {
       setError(true);
       setPlaying(false);
     }
-  }, [playing, error, currentSong, settings.musicVolume, playlist.length]);
+  }, [error, currentSong, settings.musicVolume, playlist.length]);
+
+  const pauseMusic = useCallback(() => {
+    if (!audioRef.current) return;
+    audioRef.current.pause();
+    setPlaying(false);
+  }, []);
+
+  const toggle = useCallback(async () => {
+    if (playing) {
+      pauseMusic();
+      return;
+    }
+    await playCurrentSong();
+  }, [playing, pauseMusic, playCurrentSong]);
 
   const playNext = useCallback(() => {
     if (playlist.length <= 1) return;
@@ -112,9 +130,36 @@ const MusicToggle = forwardRef(function MusicToggle({ settings }, ref) {
   // Handle audio errors gracefully
   const handleError = useCallback(() => {
     setError(true);
+    setPlaying(false);
   }, []);
 
-  useImperativeHandle(ref, () => ({ toggle, playing, error }), [toggle, playing, error]);
+  const closePlayer = useCallback(() => {
+    pauseMusic();
+    setVisible(false);
+  }, [pauseMusic]);
+
+  const toggleFromNavbar = useCallback(async () => {
+    setVisible(true);
+    if (playing) {
+      pauseMusic();
+      return;
+    }
+    await playCurrentSong();
+  }, [playing, pauseMusic, playCurrentSong]);
+
+  useImperativeHandle(ref, () => ({
+    toggle,
+    toggleFromNavbar,
+    playCurrentSong,
+    pauseMusic,
+    closePlayer,
+    showPlayer: () => setVisible(true),
+    playing,
+    error,
+    visible,
+    currentSongIndex: currentIndex,
+    currentSong,
+  }), [toggle, toggleFromNavbar, playCurrentSong, pauseMusic, closePlayer, playing, error, visible, currentIndex, currentSong]);
 
   if (!visible || playlist.length === 0) return null;
 
@@ -139,7 +184,7 @@ const MusicToggle = forwardRef(function MusicToggle({ settings }, ref) {
           {/* Dismiss */}
           <button
             aria-label="Cerrar reproductor"
-            onClick={() => { audioRef.current?.pause(); setPlaying(false); setVisible(false); }}
+            onClick={closePlayer}
             className="music-dismiss-btn"
           >
             ✕
