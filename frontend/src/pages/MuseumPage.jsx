@@ -76,7 +76,14 @@ export default function MuseumPage() {
   const handleMusicToggle = () => {
     if (musicRef.current) {
       musicRef.current.toggle();
-      setMusicPlaying(p => !p);
+      // Read back the actual state after toggle
+      // Use a microtask so the ref state has updated
+      setTimeout(() => {
+        if (musicRef.current) {
+          setMusicPlaying(musicRef.current.playing);
+          setMusicError(musicRef.current.error);
+        }
+      }, 100);
     }
   };
 

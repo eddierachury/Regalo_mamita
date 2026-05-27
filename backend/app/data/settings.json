@@ -1,1 +1,50 @@
-{"musicEnabled":true,"musicUrl":"/static/music/madrecita-querida.mp3","musicVolume":0.3,"videoTitle":"La ecuación de mamá","videoDescription":"Hay cosas que no se pueden explicar solo con palabras, pero sí con amor, recuerdos y un poco de magia. Esta animación representa todo lo que eres para mí: amor infinito, paciencia, fortaleza, ternura y sacrificio.","videoUrl":"/static/videos/ecuacion_mama.mp4","videoPlaceholderMessage":"Muy pronto aquí estará una animación especial creada con amor para ti.","videoName":"Mamá","videoEquation":"Amor + Paciencia + Fortaleza + Ternura + Sacrificio = Mamá","videoFinalPhrase":"Gracias por ser mi primer hogar, mi apoyo incondicional y la fuerza que siempre me ha enseñado a seguir adelante.","videoVisualStyle":"Elegante, cálido y emocional. Usar colores suaves como rosado, dorado, crema y vino claro. La animación debe sentirse delicada, familiar y profunda, con transiciones suaves, una curva de corazón, partículas de luz y un cierre visual con el mensaje final. Debe transmitir amor, gratitud, orgullo y nostalgia.","theme":"warm-rose","finalTitle":"Gracias por ser mi mamá","finalMessage":"Gracias por ser mi primer hogar, mi refugio, mi guía y mi mayor ejemplo de amor. Todo lo que soy lleva una parte de ti, de tus sacrificios, de tus consejos, de tu paciencia y de tu forma única de amar. Este pequeño regalo es una manera de decirte que te amo, que te admiro y que siempre estaré agradecido por tenerte como mamá.","confettiEnabled":true,"confettiButtonText":"Celebrar tu vida"}
+{
+  "musicEnabled": true,
+  "musicUrl": "/static/music/Madre.mp3",
+  "musicVolume": 0.3,
+  "musicPlaylist": [
+    {
+      "id": 1,
+      "title": "Madre",
+      "artist": "Desconocido",
+      "url": "/static/music/Madre.mp3"
+    },
+    {
+      "id": 2,
+      "title": "Ella Es Única",
+      "artist": "Desconocido",
+      "url": "/static/music/Ella Es Unica.mp3"
+    },
+    {
+      "id": 3,
+      "title": "Madrecita querida",
+      "artist": "Vicente Fernández",
+      "url": "/static/music/Vicente fernandez-Madrecita querida (LA ORIGINAL).mp3"
+    },
+    {
+      "id": 4,
+      "title": "Todos tienen una madre",
+      "artist": "Leo Dan",
+      "url": "/static/music/LEO DAN TODOS TIENEN UNA MADRE.mp3"
+    },
+    {
+      "id": 5,
+      "title": "Perdóname",
+      "artist": "Camilo Sesto",
+      "url": "/static/music/Camilo Sesto - Perdóname (Lyric Video).mp3"
+    }
+  ],
+  "videoTitle": "La ecuación de mamá",
+  "videoDescription": "Hay cosas que no se pueden explicar solo con palabras, pero sí con amor, recuerdos y un poco de magia. Esta animación representa todo lo que eres para mí: amor infinito, paciencia, fortaleza, ternura y sacrificio.",
+  "videoUrl": "/static/videos/ecuacion_mama.mp4",
+  "videoPlaceholderMessage": "Muy pronto aquí estará una animación especial creada con amor para ti.",
+  "videoName": "Mamá",
+  "videoEquation": "Amor + Paciencia + Fortaleza + Ternura + Sacrificio = Mamá",
+  "videoFinalPhrase": "Gracias por ser mi primer hogar, mi apoyo incondicional y la fuerza que siempre me ha enseñado a seguir adelante.",
+  "videoVisualStyle": "Elegante, cálido y emocional. Usar colores suaves como rosado, dorado, crema y vino claro. La animación debe sentirse delicada, familiar y profunda, con transiciones suaves, una curva de corazón, partículas de luz y un cierre visual con el mensaje final. Debe transmitir amor, gratitud, orgullo y nostalgia.",
+  "theme": "warm-rose",
+  "finalTitle": "Gracias por ser mi mamá",
+  "finalMessage": "Gracias por ser mi primer hogar, mi refugio, mi guía y mi mayor ejemplo de amor. Todo lo que soy lleva una parte de ti, de tus sacrificios, de tus consejos, de tu paciencia y de tu forma única de amar. Este pequeño regalo es una manera de decirte que te amo, que te admiro y que siempre estaré agradecido por tenerte como mamá.",
+  "confettiEnabled": true,
+  "confettiButtonText": "Celebrar tu vida"
+}

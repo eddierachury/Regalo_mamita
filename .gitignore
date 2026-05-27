@@ -9,3 +9,5 @@ frontend/.env
 backend/.env
 backend/app/static/images/*
 !backend/app/static/images/.gitkeep
+backend/app/static/music/*.mp3
+!backend/app/static/music/.gitkeep
